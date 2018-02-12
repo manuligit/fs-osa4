@@ -1,0 +1,9 @@
+POST http://localhost:3003/api/blogs
+content-type: application/json
+
+{
+    "title": "toni ja joni",
+    "author": "jonna joutsen",
+    "url": "http://www.google.fi",
+    "likes": 0
+}
