@@ -4,7 +4,7 @@ POST http://localhost:3003/api/blogs
 content-type: application/json
 
 {
-    "title": "katso pahat kuvat",
+    "title": "katso hienot kuvat",
     "author": "jonna joutsen",
     "url": "http://www.google.com",
     "likes": 0
