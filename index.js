@@ -3,18 +3,10 @@ const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
 const cors = require('cors')
+const Blog = require('./models/blog')
 const mongoose = require('mongoose')
 require('dotenv').config()
 
-
-const Blog = mongoose.model('Blog', {
-  title: String,
-  author: String,
-  url: String,
-  likes: Number
-})
-
-module.exports = Blog
 
 app.use(cors())
 app.use(bodyParser.json())
@@ -22,6 +14,7 @@ app.use(bodyParser.json())
 const mongoUrl = process.env.MONGODB_URI
 
 mongoose.connect(mongoUrl)
+
 mongoose.Promise = global.Promise
 
 app.get('/api/blogs', (request, response) => {
