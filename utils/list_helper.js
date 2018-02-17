@@ -57,6 +57,31 @@ const mostBlogs = (blogs) => {
   return item
 }
 
+const mostLikes = (blogs) => {
+  if (blogs.length === 0) {
+    return {}
+  }
+
+  let isUnique = (value, index, self) => {
+    return self.indexOf(value) === index
+  }
+  
+  let unique = blogs.map(x => x.author).filter(isUnique)
+  let objects = unique.map(x => ({author: x, likes: 0}))
+
+  blogs.map(x => {x.isUnique? null : 
+    entry = objects.find(obj => {return obj.author === x.author});
+    entry.likes += x.likes
+    })
+
+  const findLargest = (largest, item) => {
+    return (item.likes > largest.likes) ? item : largest;
+  }
+
+  const largest = objects.reduce(findLargest, objects[0])
+  return largest
+}
+
 module.exports = {
-  dummy, totalLikes, favoriteBlog, mostBlogs
+  dummy, totalLikes, favoriteBlog, mostBlogs, mostLikes
 }
