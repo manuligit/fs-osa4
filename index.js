@@ -6,7 +6,10 @@ const cors = require('cors')
 const mongoose = require('mongoose')
 const Blog = require('./models/blog')
 const blogsRouter = require('./controllers/blogs')
-require('dotenv').config()
+
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 
 const mongoUrl = process.env.MONGODB_URI
 
