@@ -8,11 +8,11 @@ const mongoose = require('mongoose')
 const blogsRouter = require('./controllers/blogs')
 const config = require('./utils/config')
 
-console.log(process.env.NODE_ENV)
+//console.log(process.env.NODE_ENV)
 
 mongoose.connect(config.mongoUrl)
   .then( () => {
-    console.log('connected to database', config.mongoUrl)
+    console.log('connected to database')
   })
   .catch (error => {
     console.log(error.name)
@@ -27,7 +27,7 @@ app.use('/api/blogs', blogsRouter)
 const server = http.createServer(app)
 
 server.listen(config.port, () => {
-  console.log(`Server running on port ${config.port}`)
+  //console.log(`Server running on port ${config.port}`)
 })
 
 server.on('close', () => {

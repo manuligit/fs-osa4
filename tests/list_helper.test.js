@@ -1,6 +1,6 @@
 const listHelper = require('../utils/list_helper')
 
-//describe.skip('list helpers', () => {
+describe.skip('list helpers', () => {
   test('dummy is called', () => {
     const blogs = []
 
@@ -150,4 +150,4 @@ const listHelper = require('../utils/list_helper')
       })
     })
   })
-//})
+})

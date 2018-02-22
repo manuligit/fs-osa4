@@ -65,24 +65,75 @@ beforeAll(async () => {
 })
 
 
+describe.skip('tests for /api/get', () => {
+  test('blogs are returned as json', async () => {
+    await api
+      .get('/api/blogs')
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+  })
 
-test('blogs are returned as json', async () => {
-  await api
-    .get('/api/blogs')
-    .expect(200)
-    .expect('Content-Type', /application\/json/)
+  test('there are two blogs', async () => {
+    const response = await api
+      .get('/api/blogs')
+    expect(response.body.length).toBe(2)
+  })
+
+  test('blog post from database should have the same name', async () => {
+    const response = await api.get('/api/blogs')
+
+    expect(response.body[0].title).toBe('React patterns')
+  })
 })
 
-test('there are two blogs', async () => {
-  const response = await api
-    .get('/api/blogs')
-  expect(response.body.length).toBe(2)
-})
+const blogPost =
+{
+  title: "Amazing new article - watch pictures",
+  author: "Jonna Joutsen",
+  url: "http://www.google.com",
+  likes: 12
+}
 
-test('blog post from database should have the same name', async () => {
-  const response = await api.get('/api/blogs')
+describe('test for /api/post', () => {
+  test('posted blogs can be found from database', async () => {
+    const initialBlogs = await api.get('/api/blogs')
+    //console.log(initialBlogs.body)
 
-  expect(response.body[0].title).toBe('React patterns')
+    await api
+      .post('/api/blogs')
+      .send(blogPost)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    const response = await api.get('/api/blogs')
+    const contents = response.body.map(r => r.title)
+
+    expect(response.body.length).toBe(initialBlogs.body.length+1)
+    expect(contents).toContain('Amazing new article - watch pictures')
+  })
+
+  // test('post without author should not be saved', async () => {
+  //   const intialBlogs = await api.get('/api/notes')
+  //   const failBlog = {
+  //     title: "Where is the author?",
+  //     url:  "http://www.google.com",
+  //     likes: 0
+  //   }
+
+  //   await api
+  //     .post('/api/blogs')
+  //     .send(blogPost)
+  //     .expect(400)
+    
+  //     const response = await api.get('/api/blogs')
+
+  //     expect(response.body.length).toBe(intialBlogs.body.length)
+
+  // })
+
+  //test that posting without likes creates likes: 0
+  //
+
 })
 
 afterAll(() => {
