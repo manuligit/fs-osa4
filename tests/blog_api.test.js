@@ -65,7 +65,7 @@ beforeAll(async () => {
 })
 
 
-describe('tests for /api/get', () => {
+describe.skip('tests for /api/get', () => {
   test('blogs are returned as json', async () => {
     await api
       .get('/api/blogs')
@@ -131,28 +131,39 @@ describe('test for /api/post', () => {
     expect(likes[initialBlogs.body.length]).toBe(0)
   })
 
-  // test('post without author should not be saved', async () => {
-  //   const intialBlogs = await api.get('/api/notes')
-  //   const failBlog = {
-  //     title: "Where is the author?",
-  //     url:  "http://www.google.com",
-  //     likes: 0
-  //   }
+  test('post without url should not be saved', async () => {
+    const initialBlogs = await api.get('/api/blogs')
+    const failBlog = {
+      title: "Where is the author?",
+      author: "Mikko mallikas",
+      likes: 0
+    }
 
-  //   await api
-  //     .post('/api/blogs')
-  //     .send(blogPost)
-  //     .expect(400)
+    await api
+      .post('/api/blogs')
+      .send(failBlog)
+      .expect(400)
     
-  //     const response = await api.get('/api/blogs')
+    const response = await api.get('/api/blogs')
+    expect(response.body.length).toBe(initialBlogs.body.length)
+  })
 
-  //     expect(response.body.length).toBe(intialBlogs.body.length)
+  test('post without title should not be saved', async () => {
+    const initialBlogs = await api.get('/api/blogs')
+    const failBlog = {
+      url: "http://www.google.com",
+      author: "Mikko mallikas",
+      likes: 0
+    }
 
-  // })
-
-  //test that posting without likes creates likes: 0
-  //
-
+    await api
+      .post('/api/blogs')
+      .send(failBlog)
+      .expect(400)
+    
+    const response = await api.get('/api/blogs')
+    expect(response.body.length).toBe(initialBlogs.body.length)
+  })
 })
 
 afterAll(() => {
