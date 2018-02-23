@@ -127,6 +127,19 @@ describe('test for /api/post', () => {
 })
 
 describe('tests for deletion', () => {
+  let addedBlog
+  //save one post for deletion
+  beforeAll(async () => {
+    addedBlog = new Blog({
+      title: 'Echoes',
+      author: 'NM',
+      url: 'http://',
+      likes: 2
+    })
+
+    await addedBlog.save()
+  })
+
   test('blog with valid id can be deleted', async () => {
     const dbBlogs = await blogsInDb() 
     const deleteBlog = dbBlogs[dbBlogs.length-1]
@@ -136,8 +149,10 @@ describe('tests for deletion', () => {
       .expect(204)
 
     const blogsAfter = await blogsInDb() 
+    const titles = blogsAfter.map(b => b.title)
 
     expect(blogsAfter.length).toBe(dbBlogs.length-1)
+    expect(titles).not.toContain(addedBlog.title)
   })
 
   test('blog without valid id will not delete anything', async () => {
@@ -148,7 +163,8 @@ describe('tests for deletion', () => {
       .delete(`/api/blogs/${badId}`)
       .expect(400)
 
-    const blogsAfter = await blogsInDb() 
+    const blogsAfter = await blogsInDb()
+    
     expect(blogsAfter.length).toBe(dbBlogs.length)
   })
 

@@ -56,7 +56,7 @@ blogsRouter.delete('/:id', async (request, response) => {
     response.status(204).end()
   }
   catch (exception) {
-    console.log(exception)
+    console.log(exception.name)
     response.status(400).json({ error: 'invalid id' })
   }
 })
