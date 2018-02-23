@@ -50,6 +50,23 @@ blogsRouter.post('/', async (request, response) => {
   }
 })
 
+blogsRouter.put('/:id', async (request, response) => {
+  try {
+    console.log('asdf')
+    const body = request.body
+    console.log(body)
+    Blog.findByIdAndUpdate(request.params.id,
+      { author: body.author, title: body.title, likes: body.likes },
+      { new: true },
+      (err, todo) => { if (err) return response.status(500).send(err); return response.send(todo)
+      })
+  }
+  catch (exception) {
+    console.log(exception.name)
+    response.status(500).json({ error: 'Something broke' })
+  }
+})
+
 blogsRouter.delete('/:id', async (request, response) => {
   try {
     await Blog.findByIdAndRemove(request.params.id)
@@ -60,5 +77,6 @@ blogsRouter.delete('/:id', async (request, response) => {
     response.status(400).json({ error: 'invalid id' })
   }
 })
+
 
 module.exports = blogsRouter

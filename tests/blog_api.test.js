@@ -167,7 +167,6 @@ describe('tests for deletion', () => {
     
     expect(blogsAfter.length).toBe(dbBlogs.length)
   })
-
 })
 
 afterAll(() => {
