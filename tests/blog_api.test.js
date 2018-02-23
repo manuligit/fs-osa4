@@ -2,7 +2,7 @@ const supertest = require('supertest')
 const { app, server } = require('../index')
 const api = supertest(app)
 const Blog = require('../models/blog')
-const { firstBlogs, blogsInDb, brokenBlog } = require('./test_helper')
+const { firstBlogs, blogsInDb, brokenBlog, newPost } = require('./test_helper')
 
 
 beforeAll(async () => {
@@ -27,9 +27,6 @@ describe('tests for /api/get', () => {
   test('single blog post is returned as json', async () => {
     const dbBlogs = await blogsInDb() 
     const blog = dbBlogs[0]
-    //console.log(blog.id)
-    //console.log(`/api/blogs/${blog.id}`)
-
     const response = await api
       .get(`/api/blogs/${blog.id}`)
       .expect(200)
@@ -43,9 +40,16 @@ describe('tests for /api/get', () => {
     expect(dbBlogs[0].title).toBe('React patterns')
   })
 
-  test('blog post with malformatted id should return 404', async () => {
+  test('blog post with malformatted id should return 400', async () => {
     const response = await api
       .get(`/api/blogs/${brokenBlog.id}`)
+      .expect(400)
+  })
+
+  test('blog post with malformatted id should return 400', async () => {
+    brokenId = "asdf"
+    const response = await api
+      .get(`/api/blogs/${brokenId}`)
       .expect(400)
   })
 })
@@ -54,16 +58,9 @@ describe('test for /api/post', () => {
   test('posted blogs can be found from database', async () => {
     const blogsBefore = await blogsInDb()
 
-    const blogPost = {
-      title: "Amazing new article - watch pictures",
-      author: "Jonna Joutsen",
-      url: "http://www.google.com",
-      likes: 12
-    }
-
     await api
       .post('/api/blogs')
-      .send(blogPost)
+      .send(newPost)
       .expect(200)
       .expect('Content-Type', /application\/json/)
 

@@ -60,11 +60,18 @@ const brokenBlog = {
   __v: 0
 }
 
+const newPost = {
+  title: "Amazing new article - watch pictures",
+  author: "Jonna Joutsen",
+  url: "http://www.google.com",
+  likes: 12
+}
+
 const blogsInDb = async () => {
   const blogs = await Blog.find({})
   return blogs
 }
 
 module.exports = {
-  firstBlogs, blogsInDb, brokenBlog
+  firstBlogs, blogsInDb, brokenBlog, newPost
 }
