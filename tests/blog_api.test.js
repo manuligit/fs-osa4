@@ -126,6 +126,34 @@ describe('test for /api/post', () => {
   })
 })
 
+describe('tests for deletion', () => {
+  test('blog with valid id can be deleted', async () => {
+    const dbBlogs = await blogsInDb() 
+    const deleteBlog = dbBlogs[dbBlogs.length-1]
+
+    await api
+      .delete(`/api/blogs/${deleteBlog.id}`)
+      .expect(204)
+
+    const blogsAfter = await blogsInDb() 
+
+    expect(blogsAfter.length).toBe(dbBlogs.length-1)
+  })
+
+  test('blog without valid id will not delete anything', async () => {
+    const dbBlogs = await blogsInDb()
+    const badId = "asdf"
+
+    const response = await api
+      .delete(`/api/blogs/${badId}`)
+      .expect(400)
+
+    const blogsAfter = await blogsInDb() 
+    expect(blogsAfter.length).toBe(dbBlogs.length)
+  })
+
+})
+
 afterAll(() => {
   server.close()
 })
