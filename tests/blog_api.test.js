@@ -2,94 +2,57 @@ const supertest = require('supertest')
 const { app, server } = require('../index')
 const api = supertest(app)
 const Blog = require('../models/blog')
+const { firstBlogs, blogsInDb, brokenBlog } = require('./test_helper')
 
-const blogs = [
-  {
-    _id: "5a422a851b54a676234d17f7",
-    title: "React patterns",
-    author: "Michael Chan",
-    url: "https://reactpatterns.com/",
-    likes: 7,
-    __v: 0
-  },
-  {
-    _id: "5a422aa71b54a676234d17f8",
-    title: "Go To Statement Considered Harmful",
-    author: "Edsger W. Dijkstra",
-    url: "http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html",
-    likes: 5,
-    __v: 0
-  },
-  {
-    _id: "5a422b3a1b54a676234d17f9",
-    title: "Canonical string reduction",
-    author: "Edsger W. Dijkstra",
-    url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
-    likes: 12,
-    __v: 0
-  },
-  {
-    _id: "5a422b891b54a676234d17fa",
-    title: "First class tests",
-    author: "Robert C. Martin",
-    url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
-    likes: 10,
-    __v: 0
-  },
-  {
-    _id: "5a422ba71b54a676234d17fb",
-    title: "TDD harms architecture",
-    author: "Robert C. Martin",
-    url: "http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html",
-    likes: 0,
-    __v: 0
-  },
-  {
-    _id: "5a422bc61b54a676234d17fc",
-    title: "Type wars",
-    author: "Robert C. Martin",
-    url: "http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html",
-    likes: 2,
-    __v: 0
-  }  
-]
 
 beforeAll(async () => {
   await Blog.remove({})
 
-  let blogObject = new Blog(blogs[0])
-  await blogObject.save()
-
-  blogObject = new Blog(blogs[1])
-  await blogObject.save()
+  const blogObjects = firstBlogs.map(b => new Blog(b))
+  await Promise.all(blogObjects.map(b => b.save()))
 })
 
-
-describe.skip('tests for /api/get', () => {
+describe('tests for /api/get', () => {
   test('blogs are returned as json', async () => {
-    await api
+    const dbBlogs = await blogsInDb() 
+
+    const response = await api
       .get('/api/blogs')
       .expect(200)
       .expect('Content-Type', /application\/json/)
+
+      expect(response.body.length).toBe(dbBlogs.length)
   })
 
-  test('there are two blogs', async () => {
+  test('single blog post is returned as json', async () => {
+    const dbBlogs = await blogsInDb() 
+    const blog = dbBlogs[0]
+    //console.log(blog.id)
+    //console.log(`/api/blogs/${blog.id}`)
+
     const response = await api
-      .get('/api/blogs')
-    expect(response.body.length).toBe(2)
+      .get(`/api/blogs/${blog.id}`)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    expect(response.body.title).toBe(blog.title)
   })
 
   test('blog post from database should have the same name', async () => {
-    const response = await api.get('/api/blogs')
+    const dbBlogs = await blogsInDb()
+    expect(dbBlogs[0].title).toBe('React patterns')
+  })
 
-    expect(response.body[0].title).toBe('React patterns')
+  test('blog post with malformatted id should return 404', async () => {
+    const response = await api
+      .get(`/api/blogs/${brokenBlog.id}`)
+      .expect(400)
   })
 })
 
 describe('test for /api/post', () => {
   test('posted blogs can be found from database', async () => {
-    const initialBlogs = await api.get('/api/blogs')
-    //console.log(initialBlogs.body)
+    const blogsBefore = await blogsInDb()
 
     const blogPost = {
       title: "Amazing new article - watch pictures",
@@ -104,15 +67,15 @@ describe('test for /api/post', () => {
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
-    const response = await api.get('/api/blogs')
-    const contents = response.body.map(r => r.title)
+    const response = await blogsInDb()
+    const blogTitles = response.map(r => r.title)
 
-    expect(response.body.length).toBe(initialBlogs.body.length+1)
-    expect(contents).toContain('Amazing new article - watch pictures')
+    expect(response.length).toBe(blogsBefore.length+1)
+    expect(blogTitles).toContain('Amazing new article - watch pictures')
   })
 
   test('blog without likes field should return 0 likes', async () => {
-    const initialBlogs = await api.get('/api/blogs')
+    const blogsBefore = await blogsInDb()
 
     const blog = {
       title: "What went wrong?",
@@ -126,13 +89,13 @@ describe('test for /api/post', () => {
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
-    const response = await api.get('/api/blogs')
-    const likes = response.body.map(r => r.likes)
-    expect(likes[initialBlogs.body.length]).toBe(0)
+    const response = await blogsInDb()
+    const likes = response.map(r => r.likes)
+    expect(likes[blogsBefore.length]).toBe(0)
   })
 
   test('post without url should not be saved', async () => {
-    const initialBlogs = await api.get('/api/blogs')
+    const blogsBefore = await blogsInDb()
     const failBlog = {
       title: "Where is the author?",
       author: "Mikko mallikas",
@@ -144,12 +107,12 @@ describe('test for /api/post', () => {
       .send(failBlog)
       .expect(400)
     
-    const response = await api.get('/api/blogs')
-    expect(response.body.length).toBe(initialBlogs.body.length)
+    const blogsAfter = await blogsInDb()
+    expect(blogsAfter.length).toBe(blogsBefore.length)
   })
 
   test('post without title should not be saved', async () => {
-    const initialBlogs = await api.get('/api/blogs')
+    const blogsBefore = await blogsInDb()
     const failBlog = {
       url: "http://www.google.com",
       author: "Mikko mallikas",
@@ -161,8 +124,8 @@ describe('test for /api/post', () => {
       .send(failBlog)
       .expect(400)
     
-    const response = await api.get('/api/blogs')
-    expect(response.body.length).toBe(initialBlogs.body.length)
+    const blogsAfter = await blogsInDb()
+    expect(blogsAfter.length).toBe(blogsBefore.length)
   })
 })
 
