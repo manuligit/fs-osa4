@@ -65,7 +65,7 @@ beforeAll(async () => {
 })
 
 
-describe.skip('tests for /api/get', () => {
+describe('tests for /api/get', () => {
   test('blogs are returned as json', async () => {
     await api
       .get('/api/blogs')
@@ -86,18 +86,17 @@ describe.skip('tests for /api/get', () => {
   })
 })
 
-const blogPost =
-{
-  title: "Amazing new article - watch pictures",
-  author: "Jonna Joutsen",
-  url: "http://www.google.com",
-  likes: 12
-}
-
 describe('test for /api/post', () => {
   test('posted blogs can be found from database', async () => {
     const initialBlogs = await api.get('/api/blogs')
     //console.log(initialBlogs.body)
+
+    const blogPost = {
+      title: "Amazing new article - watch pictures",
+      author: "Jonna Joutsen",
+      url: "http://www.google.com",
+      likes: 12
+    }
 
     await api
       .post('/api/blogs')
@@ -110,6 +109,26 @@ describe('test for /api/post', () => {
 
     expect(response.body.length).toBe(initialBlogs.body.length+1)
     expect(contents).toContain('Amazing new article - watch pictures')
+  })
+
+  test('blog without likes field should return 0 likes', async () => {
+    const initialBlogs = await api.get('/api/blogs')
+
+    const blog = {
+      title: "What went wrong?",
+      author: "Mikko Mallikas",
+      url: "http://www.google.com"
+    }
+
+    await api 
+      .post('/api/blogs')
+      .send(blog)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    const response = await api.get('/api/blogs')
+    const likes = response.body.map(r => r.likes)
+    expect(likes[initialBlogs.body.length]).toBe(0)
   })
 
   // test('post without author should not be saved', async () => {
