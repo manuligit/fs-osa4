@@ -1,0 +1,11 @@
+POST http://localhost:3001/api/blogs
+content-type: application/json
+Authorization: bearer eyJhbGciOia
+
+{
+    "author": "MIKA WALTARI",
+    "title": "MINUHE EGYPTIAN",
+    "url": "h",
+    "likes": 0,
+    "userid": "5a91bf8f2122a5da42cd17d7"
+}

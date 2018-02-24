@@ -7,7 +7,7 @@ usersRouter.get('/', async (request, response) => {
     .find({})
     .populate('blogs', { id: 1, title: 1, author: 1, url: 1, likes: 1 })
 
-  response.json(users.magp(User.format))
+  response.json(users.map(User.format))
 
 })
 
