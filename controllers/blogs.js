@@ -1,9 +1,13 @@
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 blogsRouter.get('/', async (request, response) => {
-  const blogs = await Blog.find({})
-  response.json(blogs)
+  const blogs = await Blog
+    .find({})
+    .populate('user', { id: 1, username: 1, name: 1 })
+
+  response.json((blogs.map(Blog.format)))
 })
 
 blogsRouter.get('/:id', async (request, response) => {
@@ -11,7 +15,7 @@ blogsRouter.get('/:id', async (request, response) => {
     const blog = await Blog.findById(request.params.id)
 
     if (blog) {
-      response.json(blog)
+      response.json(Blog.format(blog))
     } else {
       response.status(404).end
     }
@@ -29,6 +33,8 @@ blogsRouter.post('/', async (request, response) => {
       return response.status(400).json({ error: 'title or url missing' })
     }
 
+    const user = await User.findById(body.userId)
+
     let likes = 0
     // if the request has likes, add them to the blog object
     if (body.likes !== undefined) {
@@ -39,11 +45,15 @@ blogsRouter.post('/', async (request, response) => {
       title: body.title,
       author: body.author,
       url: body.url,
-      likes: likes
+      likes: likes,
+      user: user._id
     })
 
     const savedBlog = await blog.save()
-    response.json(savedBlog)
+    user.blogs = user.blogs.concat(savedBlog._id)
+    await user.save()
+
+    response.json(Blog.format(savedBlog))
   } catch (exception) {
     console.log(exception)
     response.status(500).json({ error: 'Something went wrong' })
@@ -77,6 +87,5 @@ blogsRouter.delete('/:id', async (request, response) => {
     response.status(400).json({ error: 'invalid id' })
   }
 })
-
 
 module.exports = blogsRouter

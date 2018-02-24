@@ -3,7 +3,8 @@ content-type: application/json
 
 {
     "title": "toni ja joni",
-    "author": "jonna joutsen",
+    "author": "jonna joutseno",
     "url": "http://www.google.fi",
-    "likes": 0
+    "likes": 0,
+    "userId": "5a91bf8f2122a5da42cd17d7"
 }

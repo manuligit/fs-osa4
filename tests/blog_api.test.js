@@ -55,7 +55,7 @@ describe('tests for /api/blogs get', () => {
   })
 })
 
-describe('test for /api/blogs post', () => {
+describe.skip('test for /api/blogs post', () => {
   test('posted blogs can be found from database', async () => {
     const blogsBefore = await blogsInDb()
 
