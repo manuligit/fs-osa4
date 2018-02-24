@@ -61,9 +61,9 @@ const brokenBlog = {
 }
 
 const newPost = {
-  title: "Amazing new article - watch pictures",
-  author: "Jonna Joutsen",
-  url: "http://www.google.com",
+  title: 'Amazing new article - watch pictures',
+  author: 'Jonna Joutsen',
+  url: 'http://www.google.com',
   likes: 12
 }
 
