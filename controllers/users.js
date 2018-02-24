@@ -20,6 +20,24 @@ usersRouter.get('/', async (request, response) => {
 usersRouter.post('/', async (request, response) => {
   try {
     const body = request.body
+    //check password length
+    if ((body.password).length < 3) {
+      return response.status(400).json({ error: 'Password is too short' })
+    }
+
+    //check for unique usernames
+    const existingUser = await User.find({ username: body.username })
+    if (existingUser) {
+      if (existingUser.length > 0) {
+        return response.status(400).json({ error: 'Username already taken' })
+      }
+    }
+
+    //set adult true if it's not defined
+    let adult = true
+    if (body.adult !== undefined) {
+      adult = body.adult
+    }
 
     const saltRounds = 10
     const passwordHash = await bcrypt.hash(body.password, saltRounds)
@@ -27,7 +45,7 @@ usersRouter.post('/', async (request, response) => {
     const user = new User({
       username: body.username,
       name: body.name,
-      adult: body.adult,
+      adult: adult,
       passwordHash
     })
 

@@ -9,13 +9,6 @@ const config = require('./utils/config')
 const usersRouter = require('./controllers/users')
 
 mongoose.connect(config.mongoUrl)
-  .then( () => {
-    console.log('connected to database')
-  })
-  .catch (error => {
-    console.log(error.name)
-  })
-
 mongoose.Promise = global.Promise
 
 app.use(cors())
@@ -26,7 +19,7 @@ app.use('/api/users', usersRouter)
 const server = http.createServer(app)
 
 server.listen(config.port, () => {
-  //console.log(`Server running on port ${config.port}`)
+  console.log(`Server running on port ${config.port}`)
 })
 
 server.on('close', () => {

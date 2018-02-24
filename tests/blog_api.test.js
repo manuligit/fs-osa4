@@ -2,7 +2,8 @@ const supertest = require('supertest')
 const { app, server } = require('../index')
 const api = supertest(app)
 const Blog = require('../models/blog')
-const { firstBlogs, blogsInDb, brokenBlog, newPost } = require('./test_helper')
+const User = require('../models/user')
+const { firstBlogs, blogsInDb, brokenBlog, newPost, usersInDb } = require('./test_helper')
 
 
 beforeAll(async () => {
@@ -12,7 +13,7 @@ beforeAll(async () => {
   await Promise.all(blogObjects.map(b => b.save()))
 })
 
-describe('tests for /api/get', () => {
+describe('tests for /api/blogs get', () => {
   test('blogs are returned as json', async () => {
     const dbBlogs = await blogsInDb() 
 
@@ -54,7 +55,7 @@ describe('tests for /api/get', () => {
   })
 })
 
-describe('test for /api/post', () => {
+describe('test for /api/blogs post', () => {
   test('posted blogs can be found from database', async () => {
     const blogsBefore = await blogsInDb()
 
@@ -126,7 +127,7 @@ describe('test for /api/post', () => {
   })
 })
 
-describe('tests for deletion', () => {
+describe('tests for api/blogs deletion', () => {
   let addedBlog
   //save one post for deletion
   beforeAll(async () => {
@@ -167,6 +168,86 @@ describe('tests for deletion', () => {
     
     expect(blogsAfter.length).toBe(dbBlogs.length)
   })
+})
+
+describe('tests for api/users post', () => {
+  beforeAll(async () => {
+    await User.remove({})
+    const user = new User({ 
+      username: 'root', 
+      name:'Super Kayttaja', 
+      password: 'salaisuus', 
+      adult: true 
+    })  
+    await user.save()
+  })
+  test('posting to /api/user succeeds with a new username', async () => {
+    const usersBefore = await usersInDb()
+    const newuser = ({ 
+      username: 'jani', 
+      name: "J A",
+      password: 'toni', 
+      adult: false 
+    })
+    
+    await api 
+      .post('/api/users')
+      .send(newuser)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    const usersAfter = await usersInDb()
+    
+    expect(usersAfter.length).toBe(usersBefore.length+1)
+    expect(usersAfter[usersBefore.length].name).toBe(newuser.name)
+    expect(usersAfter[usersBefore.length].adult).toBe(false)
+  })
+  test('posting to /api/user fails with too short password', async () => {
+    const usersBefore = await usersInDb()
+
+    const failUser = ({ username: 'mouk', name: "Mikko Mallikas", password: 't', adult: true})
+
+    const result = await api
+      .post('/api/users')
+      .send(failUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    expect(result.body).toEqual({ error: 'Password is too short' })
+
+    const usersAfter = await usersInDb()
+    expect(usersAfter.length).toBe(usersBefore.length)
+  }) 
+
+  test('creating a non-unique username fails', async () => {
+    const usersBefore = await usersInDb()
+    const user = usersBefore[0].username
+    const failUser = ({ username: user, name: "Jani Kuokka", password: 'secretagent', adult: true})
+    
+    const result = await api
+      .post('/api/users')
+      .send(failUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    expect(result.body).toEqual({ error: 'Username already taken' })
+    const usersAfter = await usersInDb()
+    expect(usersAfter.length).toBe(usersBefore.length)
+  })
+
+  test('user without adult-parameter should return true', async () => {
+    const usersBefore = await usersInDb()
+    const newuser = ({ username: 'makkara', name: "MM", password: 'sininenlenkki' })
+    
+    await api 
+      .post('/api/users')
+      .send(newuser)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    const usersAfter = await usersInDb()
+    expect(usersAfter[usersBefore.length].adult).toBe(true)
+  }) 
 })
 
 afterAll(() => {
