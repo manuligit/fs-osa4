@@ -69,10 +69,11 @@ const mostLikes = (blogs) => {
 
   let unique = blogs.map(x => x.author).filter(isUnique)
   let objects = unique.map(x => ({ author: x, likes: 0 }))
+  let entry
 
   blogs.map(x => {x.isUnique? null :
     entry = objects.find(obj => {return obj.author === x.author})
-    entry.likes += x.likes
+  entry.likes += x.likes
   })
 
   const findLargest = (largest, item) => {
