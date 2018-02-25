@@ -1,6 +1,6 @@
 POST http://localhost:3001/api/blogs
 content-type: application/json
-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Impha2UiLCJpZCI6IjVhOTFiZjhmMjEyMmE1ZGE0MmNkMTdkNyIsImlhdCI6MTUxOTUwNzYxN30.gKzDO1fqC-SES6HSg1j8CdSfncwFzcUrmjP1w00AFx8
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Impha2UiLCJpZCI6IjVhOTFiZjhmMjEyMmE1ZGE0MmNkMTdkNyIsImlhdCI6MTUxOTUwODQwN30.SAzj5_gNFnFtREDdaJsu0KEZkRc2t2MABBFf2i-pJHM
 
 {
     "author": "MIKA WALTARI",
